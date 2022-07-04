@@ -63,7 +63,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError as err:
         raise credentials_exception
     audience = payload.get('aud')
-    if not audience == 'cli-web-manager':
+    if not audience == 'cli-web-general':
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect JWT Audience",
