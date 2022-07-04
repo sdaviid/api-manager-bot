@@ -18,6 +18,5 @@ class FileDetail(baseSchema):
     name: str
     serve_uri: str
     status: str
-    serve_uploaded: str
     date_created: datetime
     
