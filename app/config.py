@@ -1,0 +1,9 @@
+SECRET_KEY = "123456"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SERVER_USERNAME = 'admir'
+SERVER_PASSWORD = '123456'
+SERVER_AUTH = 'https://authenticate.playthis.site'
+SERVER_ENCODER = 'https://encoder-manager.playthis.site'
+SERVER_DOWNLOADER = 'https://downloader-manager.playthis.site'
+SERVER_UPLOADER = 'https://uploader-manager.playthis.site'
