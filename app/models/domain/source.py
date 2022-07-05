@@ -15,7 +15,7 @@ from sqlalchemy.orm import(
     backref
 )
 from app.models.base import ModelBase
-from app.core.database import Base
+from app.core.database import Base                      
 from datetime import datetime
 
 class Source(ModelBase, Base):
@@ -26,10 +26,10 @@ class Source(ModelBase, Base):
 
 
     @classmethod
-    def add(cls, session, data):
-        server = Server()
-        server.hash = data.hash
-        session.add(server)
+    def add(cls, session, hash):
+        source = Source()
+        source.hash = hash
+        session.add(source)
         session.commit()
-        session.refresh(server)
-        return Server.find_by_id(session=session, id=server.id)
+        session.refresh(source)
+        return Source.find_by_id(session=session, id=source.id)
