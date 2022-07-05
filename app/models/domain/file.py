@@ -29,12 +29,12 @@ class File(ModelBase, Base):
 
 
     @classmethod
-    def add(cls, session, data):
+    def add(cls, session, source_id, name, status, serve_uri=None):
         file = File()
-        file.source_id = data.source_id
-        file.name = data.name
-        file.serve_uri = data.serve_uri
-        file.status = data.status
+        file.source_id = source_id
+        file.name = name
+        file.serve_uri = serve_uri
+        file.status = status
         session.add(file)
         session.commit()
         session.refresh(file)

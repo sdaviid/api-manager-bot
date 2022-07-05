@@ -11,15 +11,22 @@ from fastapi import(
 )
 from fastapi.responses import JSONResponse
 
+
 from app.core.database import get_db
+
+from app.models.schemas.file import(
+    FileAdd,
+    FileDetail
+)
+
 
 from app.api.deps import(
     allow_create_resource
 )
 
-from app.core.torrent import(
-    torrentController,
-    get_torrent_instance
+from app.core.encoder import(
+    encoderController,
+    get_encoder_instance
 )
 
 
@@ -28,19 +35,15 @@ router = APIRouter()
 
 
 @router.post(
-    '/upload',
+    '/create-encode',
     status_code=status.HTTP_200_OK,
     #dependencies=[Depends(allow_create_resource)]
 )
 async def create_upload_file(
-    file: UploadFile,
-    server: torrentController = Depends(get_torrent_instance)
+    data: FileAdd,
+    server: encoderController = Depends(get_encoder_instance)
 ):
-    contents = await file.read()
-    path_file = os.path.join(os.getcwd(), 'files', file.filename)
-    if os.path.isfile(path_file) == False:
-        with open(path_file, 'wb') as f:
-            f.write(contents)
-    data_upload = server.upload_torrent(path_file)
-    return data_upload
+    return get_encoder_instance().create_encode(source_id=data.source_id,
+            serve_uri=data.serve_uri
+        )
     

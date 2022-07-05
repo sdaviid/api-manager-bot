@@ -6,7 +6,6 @@ from app.models.schemas.base import baseSchema
 
 class FileAdd(baseSchema):
     source_id: int
-    name: str
     serve_uri: str 
     
 
