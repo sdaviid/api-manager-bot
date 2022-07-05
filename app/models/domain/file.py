@@ -24,17 +24,17 @@ class File(ModelBase, Base):
     source_id = Column(Integer)
     name = Column(String(255))
     serve_uri = Column(String(255))
-    staus = Column(String(255))
+    status = Column(String(255))
     date_created = Column(DateTime, default=datetime.utcnow())
 
 
     @classmethod
-    def add(cls, session, source_id, name, status, serve_uri=None):
+    def add(cls, session, source_id, name, status, serve_uri):
         file = File()
         file.source_id = source_id
         file.name = name
-        file.serve_uri = serve_uri
         file.status = status
+        file.serve_uri = serve_uri
         session.add(file)
         session.commit()
         session.refresh(file)

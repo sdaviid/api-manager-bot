@@ -41,6 +41,20 @@ class torrentController(object):
         except Exception as err:
             print(f'torrentController.check_hash exception - {err}')
         return False
+    def list_files_by_hash(self, hash):
+        try:
+            token = self.gen_token()
+            if token:
+                headers = {
+                    'Authorization': f'Bearer {token}'
+                }
+                response = requests.get(f'{SERVER_DOWNLOADER}/torrent/files/{hash}', headers=headers)
+                if response.status_code == 200:
+                    if len(response.json().get('files', []))>0:
+                        return response.json().get('files', [])
+        except Exception as err:
+            print(f'torrentController.list_files_by_hash exception - {err}')
+        return False
 
 
 torrent_instance = torrentController(controller_instance=controller_instance)

@@ -18,6 +18,11 @@ class manager(Thread):
         if temp_resp:
             if temp_resp['size'] == temp_resp['downloaded']:
                 Source.update_status(session=SessionLocal(), id=data.id, status="PENDING_ENCODE")
+                torrent_files = get_torrent_instance().list_files_by_hash(hash=data.hash)
+                if torrent_files:
+                    for file in torrent_files:
+                        File.add(session=SessionLocal(), source_id=data.id, name=file['name'], status="PENDING_ENCODING", serve_uri=file['serve'])
+
     def get_torrents(self):
         temp_data = Source.find_by_status(session=SessionLocal(), status="DOWNLOADING_TORRENT")
         if temp_data:
