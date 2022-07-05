@@ -25,8 +25,8 @@ class encoderController(object):
                 response = requests.post(f'{SERVER_ENCODER}/file/add', json=payload, headers=headers)
                 if response.status_code == 200:
                     temp_file = File.add(session=SessionLocal(), source_id=source_id,
-                        name=response.json().get('data', {}).get('name', False),
-                        status=response.json().get('data', {}).get('status', False)
+                        name=response.json().get('name', False),
+                        status='PENDING_DOWNLOAD'
                     )
                     if temp_file:
                         return temp_file

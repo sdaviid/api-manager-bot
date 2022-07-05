@@ -22,13 +22,25 @@ class torrentController(object):
                 }
                 response = requests.post(f'{SERVER_DOWNLOADER}/torrent/upload-torrent', files=payload, headers=headers)
                 if response.status_code == 200:
-                    temp_source = Source.add(session=SessionLocal(), hash=response.json().get('hash', False))
+                    temp_source = Source.add(session=SessionLocal(), hash=response.json().get('hash', False), status="DOWNLOADING_TORRENT")
                     if temp_source:
                         return temp_source
         except Exception as err:
             print(f'torrentController.add_torrent exception - {err}')
         return False
-
+    def check_hash(self, hash):
+        try:
+            token = self.gen_token()
+            if token:
+                headers = {
+                    'Authorization': f'Bearer {token}'
+                }
+                response = requests.get(f'{SERVER_DOWNLOADER}/torrent/status/{hash}', headers=headers)
+                if response.status_code == 200:
+                    return response.json()
+        except Exception as err:
+            print(f'torrentController.check_hash exception - {err}')
+        return False
 
 
 torrent_instance = torrentController(controller_instance=controller_instance)

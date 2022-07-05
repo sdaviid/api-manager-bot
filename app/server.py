@@ -18,6 +18,11 @@ from app.core.database import(
 
 from app.api.base import api_router
 
+from app.service.manager import manager
+
+inst_manager = manager()
+inst_manager.start()
+
 
 Base.metadata.create_all(bind=engine)
 
