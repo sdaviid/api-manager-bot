@@ -76,6 +76,17 @@ class File(ModelBase, Base):
         return False
 
 
+    @classmethod
+    def update_serve(cls, session, id, serve_uri):
+        file = cls.find_by_id(session=session, id=id)
+        if file:
+            file.serve_uri = serve_uri
+            session.commit()
+            session.refresh(file)
+            return file
+        return False
+
+
 
     @classmethod
     def find_by_status(cls, session, status):

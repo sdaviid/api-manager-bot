@@ -22,8 +22,11 @@ class uploaderController(object):
                     'origin': serve_uri
                 }
                 response = requests.post(f'{SERVER_UPLOADER}/file/upload', json=payload, headers=headers)
+                if response.status_code == 200:
+                    return response.json()
         except Exception as err:
             print(f'uploaderController.upload exception - {err}')
+        return False
 
 
 
