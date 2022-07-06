@@ -7,6 +7,7 @@ from app.models.domain.source import Source
 from app.models.domain.file import File
 
 from app.core.torrent import get_torrent_instance
+from app.core.encoder import get_encoder_instance
 
 
 
@@ -22,12 +23,31 @@ class manager(Thread):
                 if torrent_files:
                     for file in torrent_files:
                         File.add(session=SessionLocal(), source_id=data.id, name=file['name'], status="PENDING_ENCODING", serve_uri=file['serve'])
-
-    def get_torrents(self):
+    def deal_downloading_torrent(self):
         temp_data = Source.find_by_status(session=SessionLocal(), status="DOWNLOADING_TORRENT")
         if temp_data:
             for torrent in temp_data:
                 self.check_torrent(data=torrent)
+    def deal_send_encode(self):
+        temp_data = File.find_by_status(session=SessionLocal(), status="PENDING_ENCODING")
+        if temp_data:
+            for file in temp_data:
+                response_create_encode = get_encoder_instance().create_encode(source_id=file.source_id, serve_uri=file.serve_uri)
+                if response_create_encode:
+                    File.update_name_hash(session=SessionLocal(), id=file.id, name_hash=response_create_encode['name'])
+                    File.update_status(session=SessionLocal(), id=file.id, status='PENDING_DOWNLOAD')
+    def deal_encoding(self):
+        temp_data = File.find_by_statuses(session=SessionLocal(), statuses=["PENDING_DOWNLOAD", "DOWNLOADING", "PENDING_ENCODE", "ENCODING"])
+        if temp_data:
+            for item in temp_data:
+                temp_data_encoding = get_encoder_instance().get_data_by_hash(hash=item.name_hash)
+                if temp_data_encoding:
+                    File.update_status(session=SessionLocal(), id=item.id, status=temp_data_encoding['status'])
+                    File.update_progress(session=SessionLocal(), id=item.id, progress=temp_data_encoding['progress'])
+    def get_torrents(self):
+        self.deal_downloading_torrent()
+        self.deal_send_encode()
+        self.deal_encoding()
     def run(self):
         while True:
             self.get_torrents()

@@ -24,14 +24,22 @@ class encoderController(object):
                 }
                 response = requests.post(f'{SERVER_ENCODER}/file/add', json=payload, headers=headers)
                 if response.status_code == 200:
-                    temp_file = File.add(session=SessionLocal(), source_id=source_id,
-                        name=response.json().get('name', False),
-                        status='PENDING_DOWNLOAD'
-                    )
-                    if temp_file:
-                        return temp_file
+                    return response.json()
         except Exception as err:
             print(f'encoderController.create_encode exception - {err}')
+        return False
+    def get_data_by_hash(self, hash):
+        try:
+            token = self.gen_token()
+            if token:
+                headers = {
+                    'Authorization': f'Bearer {token}'
+                }
+                response = requests.get(f'{SERVER_ENCODER}/file/status/{hash}', headers=headers)
+                if response.status_code == 200:
+                    return response.json()
+        except Exception as err:
+            print(f'encoderController.get_data_by_hash exception - {err}')
         return False
 
 
