@@ -46,16 +46,28 @@ class manager(Thread):
                     if item.status == "DONE":
                         File.update_serve(session=SessionLocal(), id=item.id, serve_uri=temp_data_encoding['serve'])
                     else:
-                        File.update_status(session=SessionLocal(), id=item.id, status=temp_data_encoding['status'])
-                        File.update_progress(session=SessionLocal(), id=item.id, progress=temp_data_encoding['progress'])
+                        print(temp_data_encoding)
+                        print(item.name_hash)
+                        if 'status' in temp_data_encoding:
+                            File.update_status(session=SessionLocal(), id=item.id, status=temp_data_encoding['status'])
+                            File.update_progress(session=SessionLocal(), id=item.id, progress=temp_data_encoding['progress'])
+                        else:
+                            print('dindt find file')
     def deal_upload(self):
         temp_data = File.find_by_statuses(session=SessionLocal(), statuses=['DONE'])
         if temp_data:
             for item in temp_data:
-                temp_response_upload = get_uploader_instance().upload(serve_uri=item.serve_uri)
-                if temp_response_upload:
-                    File.update_status(session=SessionLocal(), id=item.id, status='FINISH')
-                    File.update_serve(session=SessionLocal(), id=item.id, serve_uri=temp_response_upload['url'])
+                temp_data_encoding = get_encoder_instance().get_data_by_hash(hash=item.name_hash)
+                if temp_data_encoding:
+                    try:
+                        item_updated_content = File.update_serve(session=SessionLocal(), id=item.id, serve_uri=temp_data_encoding['serve'])
+                        temp_response_upload = get_uploader_instance().upload(serve_uri=item_updated_content.serve_uri)
+                        if temp_response_upload:
+                            File.update_status(session=SessionLocal(), id=item.id, status='FINISH')
+                            print(temp_response_upload)
+                            File.update_serve(session=SessionLocal(), id=item.id, serve_uri=temp_response_upload['url'])
+                    except Exception as err:
+                        print(f'manager.deal_upload exception - {err}')
     def get_torrents(self):
         self.deal_downloading_torrent()
         self.deal_send_encode()
