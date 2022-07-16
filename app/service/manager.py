@@ -1,5 +1,6 @@
 from threading import Thread
 import time
+import requests
 
 from app.core.database import SessionLocal
 
@@ -16,14 +17,29 @@ class manager(Thread):
     def __init__ (self):
         Thread.__init__(self)
     def check_torrent(self, data):
+        print(data.hash)
         temp_resp = get_torrent_instance().check_hash(hash=data.hash)
+        print(temp_resp)
         if temp_resp:
-            if temp_resp['size'] == temp_resp['downloaded']:
-                Source.update_status(session=SessionLocal(), id=data.id, status="PENDING_ENCODE")
-                torrent_files = get_torrent_instance().list_files_by_hash(hash=data.hash)
-                if torrent_files:
-                    for file in torrent_files:
-                        File.add(session=SessionLocal(), source_id=data.id, name=file['name'], status="PENDING_ENCODING", serve_uri=file['serve'])
+            try:
+                if temp_resp['size'] == temp_resp['downloaded']:
+                    Source.update_status(session=SessionLocal(), id=data.id, status="PENDING_ENCODE")
+                    torrent_files = get_torrent_instance().list_files_by_hash(hash=data.hash)
+                    if torrent_files:
+                        for file in torrent_files:
+                            mime_type = self.check_mime_by_url(file['serve'])
+                            if mime_type == 'video/x-matroska':
+                                File.add(session=SessionLocal(), source_id=data.id, name=file['name'], status="PENDING_ENCODING", serve_uri=file['serve'])
+            except Exception as err:
+                print(f'manager.check_torrent exception - {err}')
+    def check_mime_by_url(self, url):
+        try:
+            response = requests.head(url)
+            if response.status_code == 200:
+                return response.headers.get('content-type')
+        except Exception as err:
+            print(f'manager.check_mime_by_url exception - {err}')
+        return False
     def deal_downloading_torrent(self):
         temp_data = Source.find_by_status(session=SessionLocal(), status="DOWNLOADING_TORRENT")
         if temp_data:
