@@ -84,11 +84,25 @@ class manager(Thread):
                             File.update_serve(session=SessionLocal(), id=item.id, serve_uri=temp_response_upload['url'])
                     except Exception as err:
                         print(f'manager.deal_upload exception - {err}')
+    def handle_finish_source(self):
+        temp_data = Source.find_by_status(session=SessionLocal(), status='PENDING_ENCODE')
+        if temp_data:
+            for source in temp_data:
+                temp_file = File.find_by_id_source(session=SessionLocal(), id_source=source.id)
+                if temp_file:
+                    has_break = False
+                    for file in temp_file:
+                        if file.status != 'FINISH':
+                            has_break = True
+                            break
+                    if has_break == False:
+                        Source.update_status(session=SessionLocal(), id=source.id, status='FINISH')
     def get_torrents(self):
         self.deal_downloading_torrent()
         self.deal_send_encode()
         self.deal_encoding()
         self.deal_upload()
+        self.handle_finish_source()
     def run(self):
         while True:
             self.get_torrents()

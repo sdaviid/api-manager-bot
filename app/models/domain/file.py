@@ -104,3 +104,12 @@ class File(ModelBase, Base):
         except Exception as err:
             print(f'models.file.find_by_statuses exception - {err}')
         return False
+
+
+    @classmethod
+    def find_by_id_source(cls, session, id_source):
+        try:
+            return session.query(cls).filter_by(source_id=id_source).all()
+        except Exception as err:
+            print(f'model.file.find_by_id_source exception - {err}')
+        return False
